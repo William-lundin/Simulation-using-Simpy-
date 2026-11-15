@@ -1,3 +1,4 @@
+
 import simpy
 import random
 import statistics
@@ -5,64 +6,149 @@ from collections import defaultdict
 
 
 # ============================================================
-# 1. KLINIKENS INSTÄLLNINGAR
+# 1. KLINIKENS KONFIGURATION
 # ============================================================
-# Alla värden som senare ska kunna ändras av en LLM ligger här.
-# Simuleringslogiken längre ned ska inte behöva skrivas om.
 
 CONFIG = {
 
-    # Öppettider
     "opening_hour": 8,
     "closing_hour": 16,
 
-    # Hur ofta kliniken bokar in en patient.
-    # 12 minuter innebär ungefär 40 bokningar under 8 timmar.
-    "appointment_interval": 5,
-
-    # Variation i när patienterna faktiskt anländer.
-    # Exempelvis kan en patient komma några minuter tidigt eller sent.
     "arrival_std": 3,
-
-    # Andel patienter som inte dyker upp.
     "no_show_probability": 0.05,
+    "service_time_variation": 0.20,
 
-    # Personal per station
-    "nurses": 3,
-    "doctors": 4,
-    "lab_staff": 2,
-
-    # Rum per station
-    "nurse_rooms": 3,
-    "doctor_rooms": 2,
-    "lab_rooms": 2,
-
-    # Behandlingstider i minuter.
-    # Värdena används som typvärden i en triangulär fördelning.
-    "nurse_time": 12,
-    "doctor_time": 20,
-    "lab_time": 10,
-
-    # Variation i behandlingstider.
-    # 0.2 betyder att tiden kan variera ungefär +/- 20 %.
-    "service_time_variation": 0.2,
-
-    # Fördelning av olika patienttyper.
-    # Värdena behöver inte summera till 100, eftersom de normaliseras.
-    "patient_types": {
-        "nurse_only": 30,
-        "doctor_only": 35,
-        "nurse_doctor": 20,
-        "nurse_lab": 15
+    "service_times": {
+        "nurse": 12,
+        "doctor": 20,
+        "lab": 10
     },
 
-    # Reproducerbara resultat.
+    "rooms": {
+        "nurse": 3,
+        "doctor": 2,
+        "lab": 2
+    },
+
+    # Separata bokningsscheman per patienttyp.
+    # Tider anges i minuter efter öppning.
+
+    "appointment_schedules": {
+
+        "nurse_only": {
+            "interval": 20,
+            "first": 0
+        },
+
+        "doctor_only": {
+            "interval": 20,
+            "first": 5
+        },
+
+        "nurse_doctor": {
+            "interval": 30,
+            "first": 10
+        },
+
+        "nurse_lab": {
+            "interval": 30,
+            "first": 15
+        }
+    },
+
+    # Individuella arbetsscheman.
+    # Tider anges i minuter efter öppning.
+
+    "staff_schedules": {
+
+        "nurse": [
+
+            {
+                "name": "Nurse_1",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 240,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Nurse_2",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 270,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Nurse_3",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 300,
+                "lunch_duration": 30
+            }
+        ],
+
+        "doctor": [
+
+            {
+                "name": "Doctor_1",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 240,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Doctor_2",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 270,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Doctor_3",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 300,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Doctor_4",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 330,
+                "lunch_duration": 30
+            }
+        ],
+
+        "lab": [
+
+            {
+                "name": "Lab_1",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 240,
+                "lunch_duration": 30
+            },
+
+            {
+                "name": "Lab_2",
+                "start": 0,
+                "end": 480,
+                "lunch_start": 270,
+                "lunch_duration": 30
+            }
+        ]
+    },
+
     "random_seed": 42
 }
 
 
 # ============================================================
-# 2. GRUNDLÄGGANDE TID OCH KAPACITET
+# 2. TIDSHANTERING
 # ============================================================
 
 OPENING_MINUTE = CONFIG["opening_hour"] * 60
@@ -70,22 +156,26 @@ CLOSING_MINUTE = CONFIG["closing_hour"] * 60
 
 OPENING_DURATION = CLOSING_MINUTE - OPENING_MINUTE
 
-# Antalet bokningar skapas utifrån öppettiden och intervallet.
-# Den sista bokningen måste ligga före stängning.
-APPOINTMENT_INTERVAL = CONFIG["appointment_interval"]
 
-NUMBER_OF_APPOINTMENTS = (
-    OPENING_DURATION + APPOINTMENT_INTERVAL - 1
-) // APPOINTMENT_INTERVAL
+def format_time(minutes):
+
+    hours = int(minutes // 60)
+    mins = int(minutes % 60)
+
+    return f"{hours:02d}:{mins:02d}"
+
+
+def interval_overlap(start1, end1, start2, end2):
+
+    return max(
+        0,
+        min(end1, end2) - max(start1, start2)
+    )
 
 
 # ============================================================
-# 3. PATIENTTYPER OCH BEHANDLINGSFLÖDEN
+# 3. PATIENTTYPER OCH VÅRDFLÖDEN
 # ============================================================
-
-# Varje patienttyp har en bestämd vårdväg.
-# Ordningen är viktig: en patient som behöver sjuksköterska
-# och läkare måste först genomföra sjuksköterskebesöket.
 
 PATIENT_ROUTES = {
 
@@ -99,315 +189,512 @@ PATIENT_ROUTES = {
 }
 
 
-# Behandlingstidernas grundvärden.
-SERVICE_TIMES = {
-    "nurse": CONFIG["nurse_time"],
-    "doctor": CONFIG["doctor_time"],
-    "lab": CONFIG["lab_time"]
-}
+# ============================================================
+# 4. STATISTIK
+# ============================================================
+
+def create_stats():
+
+    return {
+
+        "patients_booked": 0,
+        "patients_arrived": 0,
+        "patients_no_show": 0,
+        "patients_after_closing": 0,
+
+        "patients_completed": 0,
+        "patients_incomplete": 0,
+
+        "patient_types": defaultdict(int),
+
+        "station_treatments": defaultdict(int),
+
+        "station_waits": defaultdict(list),
+
+        "station_max_queue": defaultdict(int),
+
+        "station_not_started": defaultdict(int),
+
+        "staff_busy_open": defaultdict(float),
+        "staff_busy_total": defaultdict(float),
+
+        "room_busy_open": defaultdict(float),
+        "room_busy_total": defaultdict(float),
+
+        "patient_total_times": []
+    }
+
+
+stats = create_stats()
 
 
 # ============================================================
-# 4. SIMULERINGENS RESULTATDATA
+# 5. STATION MANAGER
 # ============================================================
 
-# All statistik samlas här.
-# defaultdict gör att nya stationer kan läggas till utan
-# att vi först behöver skapa en separat variabel för dem.
+class StationManager:
 
-stats = {
+    """
+    Hanterar personal, rum och kö separat.
 
-    "patients_booked": 0,
-    "patients_arrived": 0,
-    "patients_no_show": 0,
-    "patients_after_closing": 0,
+    En behandling kan endast starta när både
+    personal och behandlingsrum är tillgängliga.
 
-    "patients_completed": 0,
-    "patients_incomplete": 0,
+    En central köhanterare tilldelar båda resurserna
+    samtidigt. Ingen resurs reserveras i förväg.
+    """
 
-    "station_treatments": defaultdict(int),
+    def __init__(self, env, station, staff, room_count):
 
-    "station_waits": defaultdict(list),
+        self.env = env
+        self.station = station
 
-    "station_busy_open": defaultdict(float),
+        self.staff = staff
 
-    "station_busy_total": defaultdict(float),
+        self.rooms = [
+            f"{station}_room_{i + 1}"
+            for i in range(room_count)
+        ]
 
-    "station_max_queue": defaultdict(int),
+        self.busy_staff = set()
+        self.busy_rooms = set()
 
-    "patient_total_times": [],
+        self.queue = []
 
-    "patient_types": defaultdict(int),
+        self.changed = env.event()
 
-    "patients_not_started": defaultdict(int)
-}
+        self.create_schedule_events()
+
+        env.process(self.dispatcher())
+
+    # --------------------------------------------------------
+    # KONTROLLERA PERSONALENS TILLGÄNGLIGHET
+    # --------------------------------------------------------
+
+    def staff_is_available(self, employee):
+
+        now = self.env.now
+
+        if not (
+            employee["start"] <= now < employee["end"]
+        ):
+            return False
+
+        lunch_start = employee["lunch_start"]
+
+        lunch_end = (
+            lunch_start + employee["lunch_duration"]
+        )
+
+        if lunch_start <= now < lunch_end:
+            return False
+
+        if employee["name"] in self.busy_staff:
+            return False
+
+        return True
+
+    # --------------------------------------------------------
+    # VÄCK KÖHANTERAREN
+    # --------------------------------------------------------
+
+    def notify(self):
+
+        old_event = self.changed
+
+        self.changed = self.env.event()
+
+        if not old_event.triggered:
+            old_event.succeed()
+
+    # --------------------------------------------------------
+    # SCHEMALAGDA HÄNDELSER
+    # --------------------------------------------------------
+
+    def create_schedule_events(self):
+
+        boundaries = {CLOSING_MINUTE}
+
+        for employee in self.staff:
+
+            boundaries.add(employee["start"])
+            boundaries.add(employee["end"])
+
+            lunch_start = employee["lunch_start"]
+
+            lunch_end = (
+                lunch_start + employee["lunch_duration"]
+            )
+
+            boundaries.add(lunch_start)
+            boundaries.add(lunch_end)
+
+        for boundary in sorted(boundaries):
+
+            if 0 < boundary <= CLOSING_MINUTE:
+
+                self.env.process(
+                    self.wake_at(boundary)
+                )
+
+    def wake_at(self, target_time):
+
+        yield self.env.timeout(
+            target_time - self.env.now
+        )
+
+        self.notify()
+
+    # --------------------------------------------------------
+    # PATIENTEN BEGÄR EN BEHANDLINGSPLATS
+    # --------------------------------------------------------
+
+    def request(self, patient_id):
+
+        if self.env.now >= CLOSING_MINUTE:
+            return None
+
+        job = {
+
+            "patient_id": patient_id,
+
+            "request_time": self.env.now,
+
+            "event": self.env.event()
+        }
+
+        self.queue.append(job)
+
+        stats["station_max_queue"][self.station] = max(
+            stats["station_max_queue"][self.station],
+            len(self.queue)
+        )
+
+        self.notify()
+
+        assignment = yield job["event"]
+
+        return assignment
+
+    # --------------------------------------------------------
+    # CENTRAL KÖHANTERARE
+    # --------------------------------------------------------
+
+    def dispatcher(self):
+
+        while True:
+
+            # Stängning: inga nya behandlingar får starta.
+            if self.env.now >= CLOSING_MINUTE:
+
+                while self.queue:
+
+                    job = self.queue.pop(0)
+
+                    if not job["event"].triggered:
+                        job["event"].succeed(None)
+
+                yield self.changed
+
+                continue
+
+            assignment_made = False
+
+            while self.queue:
+
+                available_staff = [
+
+                    employee
+                    for employee in self.staff
+
+                    if self.staff_is_available(employee)
+                ]
+
+                available_rooms = [
+
+                    room
+                    for room in self.rooms
+
+                    if room not in self.busy_rooms
+                ]
+
+                if not available_staff or not available_rooms:
+                    break
+
+                # FIFO: äldsta patientförfrågan först.
+                job = self.queue.pop(0)
+
+                employee = available_staff[0]
+
+                room = available_rooms[0]
+
+                # Reservera personal och rum samtidigt.
+                self.busy_staff.add(employee["name"])
+
+                self.busy_rooms.add(room)
+
+                waiting_time = (
+                    self.env.now - job["request_time"]
+                )
+
+                assignment = {
+
+                    "staff": employee,
+
+                    "room": room,
+
+                    "waiting_time": waiting_time
+                }
+
+                if not job["event"].triggered:
+                    job["event"].succeed(assignment)
+
+                assignment_made = True
+
+            if not assignment_made:
+
+                # Vänta tills någon resurs förändras,
+                # en lunch börjar/slutar eller kliniken stänger.
+                yield self.changed
+
+    # --------------------------------------------------------
+    # FRIGÖR RESURSER
+    # --------------------------------------------------------
+
+    def release(self, employee, room):
+
+        self.busy_staff.remove(employee["name"])
+
+        self.busy_rooms.remove(room)
+
+        self.notify()
 
 
 # ============================================================
-# 5. SKAPA KLINIKENS RESURSER
+# 6. SKAPA RESURSER OCH KONVERTERA TIDER
 # ============================================================
-
-# En behandlingsplats kräver både personal och ett rum.
-#
-# Exempel:
-# 3 sjuksköterskor + 2 sjuksköterskerum = 2 samtidiga platser.
-#
-# Vi modellerar dessa som kombinerade behandlingsplatser.
-# Det betyder att en plats alltid har både personal och rum.
 
 def create_resources(env):
 
-    resources = {}
+    managers = {}
 
-    station_settings = {
+    for station, staff_config in CONFIG["staff_schedules"].items():
 
-        "nurse": (
-            CONFIG["nurses"],
-            CONFIG["nurse_rooms"]
-        ),
+        staff = []
 
-        "doctor": (
-            CONFIG["doctors"],
-            CONFIG["doctor_rooms"]
-        ),
+        for employee in staff_config:
 
-        "lab": (
-            CONFIG["lab_staff"],
-            CONFIG["lab_rooms"]
+            # Kopiera originalet så att CONFIG inte ändras.
+            employee_copy = employee.copy()
+
+            # VIKTIG KORRIGERING:
+            # Konvertera från minuter efter öppning
+            # till minuter efter midnatt.
+            employee_copy["start"] += OPENING_MINUTE
+
+            employee_copy["end"] += OPENING_MINUTE
+
+            employee_copy["lunch_start"] += OPENING_MINUTE
+
+            staff.append(employee_copy)
+
+        room_count = CONFIG["rooms"][station]
+
+        managers[station] = StationManager(
+
+            env=env,
+
+            station=station,
+
+            staff=staff,
+
+            room_count=room_count
         )
-    }
 
-    for station, (staff, rooms) in station_settings.items():
-
-        capacity = min(staff, rooms)
-
-        resources[station] = simpy.Resource(
-            env,
-            capacity=capacity
-        )
-
-    return resources
+    return managers
 
 
 # ============================================================
-# 6. SLUMPA PATIENTTYP
-# ============================================================
-
-def choose_patient_type():
-
-    patient_types = CONFIG["patient_types"]
-
-    names = list(patient_types.keys())
-
-    weights = list(patient_types.values())
-
-    return random.choices(
-        names,
-        weights=weights,
-        k=1
-    )[0]
-
-
-# ============================================================
-# 7. SKAPA EN BOKNINGSLISTA FÖR EN DAG
+# 7. SKAPA BOKNINGSSCHEMA
 # ============================================================
 
 def create_schedule():
 
     schedule = []
 
-    for i in range(NUMBER_OF_APPOINTMENTS):
+    patient_id = 1
 
-        appointment_time = (
-            OPENING_MINUTE
-            + i * APPOINTMENT_INTERVAL
-        )
+    for patient_type, settings in (
+        CONFIG["appointment_schedules"].items()
+    ):
 
-        # Säkerställ att inga bokningar sker efter stängning.
-        if appointment_time >= CLOSING_MINUTE:
-            break
+        interval = settings["interval"]
 
-        patient_type = choose_patient_type()
+        first_appointment = settings["first"]
 
-        # Patientens faktiska ankomst kan avvika från bokningen.
-        arrival_delay = random.gauss(
-            0,
-            CONFIG["arrival_std"]
-        )
+        if interval <= 0:
+            raise ValueError(
+                f"Ogiltigt bokningsintervall: {patient_type}"
+            )
 
-        # No-show bestäms redan när schemat skapas.
-        no_show = (
-            random.random()
-            < CONFIG["no_show_probability"]
-        )
+        if patient_type not in PATIENT_ROUTES:
+            raise ValueError(
+                f"Okänd patienttyp: {patient_type}"
+            )
 
-        schedule.append({
+        appointment_time = first_appointment
 
-            "patient_id": i + 1,
+        while appointment_time < OPENING_DURATION:
 
-            "appointment_time": appointment_time,
+            arrival_delay = random.gauss(
+                0,
+                CONFIG["arrival_std"]
+            )
 
-            "patient_type": patient_type,
+            no_show = (
+                random.random()
+                < CONFIG["no_show_probability"]
+            )
 
-            "arrival_delay": arrival_delay,
+            schedule.append({
 
-            "no_show": no_show
-        })
+                "patient_id": patient_id,
+
+                "appointment_time": (
+                    OPENING_MINUTE + appointment_time
+                ),
+
+                "patient_type": patient_type,
+
+                "arrival_delay": arrival_delay,
+
+                "no_show": no_show
+            })
+
+            patient_id += 1
+
+            appointment_time += interval
+
+    schedule.sort(
+        key=lambda patient: patient["appointment_time"]
+    )
 
     return schedule
 
 
 # ============================================================
-# 8. HJÄLPFUNKTIONER FÖR TID
+# 8. GENOMFÖR BEHANDLING
 # ============================================================
 
-def format_time(minutes):
+def treatment(env, patient_id, station, managers):
 
-    hours = int(minutes // 60)
+    manager = managers[station]
 
-    mins = int(minutes % 60)
-
-    return f"{hours:02d}:{mins:02d}"
-
-
-def open_hours_overlap(start, end):
-
-    """
-    Räknar ut hur många minuter av en behandling som
-    ligger inom klinikens ordinarie öppettider.
-
-    Exempel:
-    Behandling 15:50–16:10 ger:
-    10 minuter inom öppettid.
-    10 minuter övertid.
-    """
-
-    overlap_start = max(start, OPENING_MINUTE)
-
-    overlap_end = min(end, CLOSING_MINUTE)
-
-    return max(0, overlap_end - overlap_start)
-
-
-# ============================================================
-# 9. GENOMFÖR EN BEHANDLING
-# ============================================================
-
-def treatment(env, patient_id, station, resources):
-
-    resource = resources[station]
-
-    # Tidpunkten då patienten börjar vänta.
     queue_start = env.now
 
-    # Patienten begär en behandlingsplats.
-    with resource.request() as request:
+    assignment = yield from manager.request(patient_id)
 
-        # Om alla platser är upptagna hamnar patienten i kö.
-        # SimPy släpper fram patienten när en plats blir ledig.
-        if resource.count >= resource.capacity:
+    # Patienten fick ingen behandlingsplats före stängning.
+    if assignment is None:
 
-            current_queue = len(resource.queue) + 1
-
-            stats["station_max_queue"][station] = max(
-                stats["station_max_queue"][station],
-                current_queue
-            )
-
-        yield request
-
-        # Beräkna väntetid.
-        wait_time = env.now - queue_start
+        waiting_time = env.now - queue_start
 
         stats["station_waits"][station].append(
-            wait_time
+            waiting_time
         )
 
-        # Viktigt:
-        # En patient får inte påbörja en ny behandling
-        # efter att kliniken har stängt.
-        if env.now >= CLOSING_MINUTE:
+        stats["station_not_started"][station] += 1
 
-            stats["patients_not_started"][station] += 1
+        return False
 
-            return False
+    employee = assignment["staff"]
 
-        # Slumpa behandlingstid.
-        average_time = SERVICE_TIMES[station]
+    room = assignment["room"]
 
-        variation = CONFIG["service_time_variation"]
+    waiting_time = assignment["waiting_time"]
 
-        service_time = random.triangular(
+    stats["station_waits"][station].append(
+        waiting_time
+    )
 
-            average_time * (1 - variation),
+    treatment_start = env.now
 
-            average_time * (1 + variation),
+    average_time = CONFIG["service_times"][station]
 
-            average_time
-        )
+    variation = CONFIG["service_time_variation"]
 
-        service_start = env.now
+    service_time = random.triangular(
 
-        service_end = service_start + service_time
+        average_time * (1 - variation),
 
-        # Mät hur mycket av behandlingstiden som ligger
-        # inom ordinarie öppettid.
-        busy_during_opening = open_hours_overlap(
-            service_start,
-            service_end
-        )
+        average_time * (1 + variation),
 
-        stats["station_busy_open"][station] += (
-            busy_during_opening
-        )
+        average_time
+    )
 
-        stats["station_busy_total"][station] += (
-            service_time
-        )
+    treatment_end = treatment_start + service_time
 
-        stats["station_treatments"][station] += 1
+    # Mät behandlingstid inom klinikens öppettid.
+    busy_open = interval_overlap(
 
-        # Behandlingen får slutföras även om den passerar
-        # klinikens stängningstid.
-        yield env.timeout(service_time)
+        treatment_start,
 
-        return True
+        treatment_end,
+
+        OPENING_MINUTE,
+
+        CLOSING_MINUTE
+    )
+
+    # Personalens beläggning.
+    stats["staff_busy_open"][employee["name"]] += busy_open
+
+    stats["staff_busy_total"][employee["name"]] += service_time
+
+    # Rummets beläggning.
+    stats["room_busy_open"][room] += busy_open
+
+    stats["room_busy_total"][room] += service_time
+
+    stats["station_treatments"][station] += 1
+
+    # Behandlingen får slutföras efter stängning.
+    yield env.timeout(service_time)
+
+    manager.release(employee, room)
+
+    return True
 
 
 # ============================================================
-# 10. PATIENTENS VÅRDFÖRLOPP
+# 9. PATIENTENS VÅRDFÖRLOPP
 # ============================================================
 
-def patient_process(env, patient, resources):
+def patient_process(env, patient, managers):
 
     patient_id = patient["patient_id"]
 
-    appointment_time = patient["appointment_time"]
-
     patient_type = patient["patient_type"]
 
-    arrival_delay = patient["arrival_delay"]
-
-    no_show = patient["no_show"]
+    appointment_time = patient["appointment_time"]
 
     stats["patients_booked"] += 1
 
     stats["patient_types"][patient_type] += 1
 
-    # Beräkna faktisk ankomsttid.
     actual_arrival = max(
+
         OPENING_MINUTE,
-        appointment_time + arrival_delay
+
+        appointment_time + patient["arrival_delay"]
     )
 
-    # Simuleringens klocka börjar vid minut 0.
-    # Vänta tills patienten faktiskt anländer.
+    # Vänta till faktisk ankomst.
     yield env.timeout(
         max(0, actual_arrival - env.now)
     )
 
-    # Patient som inte dyker upp.
-    if no_show:
+    if patient["no_show"]:
 
         stats["patients_no_show"] += 1
 
@@ -415,7 +702,7 @@ def patient_process(env, patient, resources):
 
     stats["patients_arrived"] += 1
 
-    # Patient som anländer efter stängning kan inte tas emot.
+    # Ingen patient får påbörja vård efter stängning.
     if env.now >= CLOSING_MINUTE:
 
         stats["patients_after_closing"] += 1
@@ -428,85 +715,116 @@ def patient_process(env, patient, resources):
 
     route = PATIENT_ROUTES[patient_type]
 
-    completed_stations = 0
-
-    # Patienten går igenom sin vårdväg i rätt ordning.
     for station in route:
 
         completed = yield from treatment(
+
             env,
+
             patient_id,
+
             station,
-            resources
+
+            managers
         )
 
-        # Om behandlingen inte kan påbörjas före stängning
-        # avbryts patientens återstående vårdväg.
         if not completed:
 
             stats["patients_incomplete"] += 1
 
             return
 
-        completed_stations += 1
-
-    # Patienten har genomfört hela sin vårdväg.
     stats["patients_completed"] += 1
 
     total_time = env.now - patient_start
 
-    stats["patient_total_times"].append(
-        total_time
-    )
+    stats["patient_total_times"].append(total_time)
 
 
 # ============================================================
-# 11. KÖR EN KLINIKDAG
+# 10. KÖR EN KLINIKDAG
 # ============================================================
 
 def run_clinic_day():
 
-    # Samma slumpfrö ger reproducerbara resultat.
+    global stats
+
     random.seed(CONFIG["random_seed"])
+
+    stats = create_stats()
 
     env = simpy.Environment()
 
-    resources = create_resources(env)
+    managers = create_resources(env)
 
     schedule = create_schedule()
 
-    # Lägg in alla patientprocesser.
-    # Varje patient hanteras självständigt.
     for patient in schedule:
 
         env.process(
             patient_process(
                 env,
                 patient,
-                resources
+                managers
             )
         )
 
-    # Kör tills samtliga patienter har avslutat
-    # eller avbrutit sitt vårdförlopp.
+    # Alla patienter som har påbörjat behandling
+    # får avsluta sina processer.
     env.run()
 
-    return resources
+    return managers
+
+
+# ============================================================
+# 11. BERÄKNA PERSONALENS TILLGÄNGLIGA ARBETSTID
+# ============================================================
+
+def calculate_staff_availability(employee):
+
+    shift_minutes = interval_overlap(
+
+        employee["start"],
+
+        employee["end"],
+
+        OPENING_MINUTE,
+
+        CLOSING_MINUTE
+    )
+
+    lunch_end = (
+        employee["lunch_start"]
+        + employee["lunch_duration"]
+    )
+
+    lunch_minutes = interval_overlap(
+
+        employee["lunch_start"],
+
+        lunch_end,
+
+        OPENING_MINUTE,
+
+        CLOSING_MINUTE
+    )
+
+    return max(0, shift_minutes - lunch_minutes)
 
 
 # ============================================================
 # 12. KAPACITETSRAPPORT
 # ============================================================
 
-def print_capacity_report(resources):
+def print_capacity_report(managers):
 
     print("\n")
-    print("=" * 65)
-    print("                 CLINICFLOW – KAPACITETSRAPPORT")
-    print("=" * 65)
+    print("=" * 70)
+    print("             CLINICFLOW – KAPACITETSRAPPORT")
+    print("=" * 70)
 
     print(
-        f"\nKlinikens öppettider: "
+        f"\nÖppettider: "
         f"{format_time(OPENING_MINUTE)}–"
         f"{format_time(CLOSING_MINUTE)}"
     )
@@ -515,38 +833,19 @@ def print_capacity_report(resources):
         f"Öppettid: {OPENING_DURATION} minuter"
     )
 
-    print(
-        f"Bokningsintervall: "
-        f"{APPOINTMENT_INTERVAL} minuter"
-    )
-
-    print(
-        f"Planerade bokningar: "
-        f"{NUMBER_OF_APPOINTMENTS}"
-    )
-
     # --------------------------------------------------------
     # PATIENTFLÖDE
     # --------------------------------------------------------
 
-    print("\n" + "-" * 65)
+    print("\n" + "-" * 70)
     print("1. PATIENTFLÖDE")
-    print("-" * 65)
+    print("-" * 70)
 
-    print(
-        f"Bokade patienter: "
-        f"{stats['patients_booked']}"
-    )
+    print(f"Bokade patienter: {stats['patients_booked']}")
 
-    print(
-        f"Anlända patienter: "
-        f"{stats['patients_arrived']}"
-    )
+    print(f"Anlända patienter: {stats['patients_arrived']}")
 
-    print(
-        f"Uteblivna patienter: "
-        f"{stats['patients_no_show']}"
-    )
+    print(f"Uteblivna patienter: {stats['patients_no_show']}")
 
     print(
         f"Patienter efter stängning: "
@@ -554,7 +853,7 @@ def print_capacity_report(resources):
     )
 
     print(
-        f"Fullständigt genomförda vårdförlopp: "
+        f"Genomförda vårdförlopp: "
         f"{stats['patients_completed']}"
     )
 
@@ -563,91 +862,107 @@ def print_capacity_report(resources):
         f"{stats['patients_incomplete']}"
     )
 
-    # --------------------------------------------------------
-    # PATIENTTYPER
-    # --------------------------------------------------------
-
-    print("\n" + "-" * 65)
-    print("2. FÖRDELNING AV PATIENTTYPER")
-    print("-" * 65)
+    print("\nPatienttyper:")
 
     for patient_type, count in stats["patient_types"].items():
 
-        print(
-            f"{patient_type:20s}: {count:3d} patienter"
-        )
+        print(f"  {patient_type:20s}: {count}")
 
     # --------------------------------------------------------
     # STATIONERNAS KAPACITET
     # --------------------------------------------------------
 
-    print("\n" + "-" * 65)
-    print("3. RESURSUTNYTTJANDE PER STATION")
-    print("-" * 65)
+    print("\n" + "-" * 70)
+    print("2. STATIONERNAS RESURSUTNYTTJANDE")
+    print("-" * 70)
 
-    station_settings = {
+    for station, manager in managers.items():
 
-        "nurse": (
-            CONFIG["nurses"],
-            CONFIG["nurse_rooms"]
-        ),
+        staff_available = sum(
 
-        "doctor": (
-            CONFIG["doctors"],
-            CONFIG["doctor_rooms"]
-        ),
+            calculate_staff_availability(employee)
 
-        "lab": (
-            CONFIG["lab_staff"],
-            CONFIG["lab_rooms"]
-        )
-    }
-
-    for station, (staff, rooms) in station_settings.items():
-
-        capacity = resources[station].capacity
-
-        busy_minutes = stats["station_busy_open"][station]
-
-        # Total möjlig kapacitet under öppettiden.
-        total_available_minutes = (
-            capacity * OPENING_DURATION
+            for employee in manager.staff
         )
 
-        if total_available_minutes > 0:
+        staff_busy = sum(
 
-            utilization = (
-                busy_minutes / total_available_minutes
-            ) * 100
+            stats["staff_busy_open"][employee["name"]]
 
-        else:
+            for employee in manager.staff
+        )
 
-            utilization = 0
+        room_available = (
+            len(manager.rooms) * OPENING_DURATION
+        )
+
+        room_busy = sum(
+
+            stats["room_busy_open"][room]
+
+            for room in manager.rooms
+        )
+
+        staff_utilization = (
+
+            staff_busy / staff_available * 100
+
+            if staff_available > 0 else 0
+        )
+
+        room_utilization = (
+
+            room_busy / room_available * 100
+
+            if room_available > 0 else 0
+        )
 
         waits = stats["station_waits"][station]
 
         average_wait = (
+
             statistics.mean(waits)
+
             if waits else 0
         )
 
-        max_wait = (
+        maximum_wait = (
+
             max(waits)
+
             if waits else 0
+        )
+
+        # Teoretisk kapacitet baserat på tillgänglig
+        # personal och rum.
+        average_service_time = CONFIG["service_times"][station]
+
+        staff_capacity = (
+            staff_available / average_service_time
+        )
+
+        room_capacity = (
+            room_available / average_service_time
+        )
+
+        theoretical_capacity = min(
+            staff_capacity,
+            room_capacity
         )
 
         print(f"\n{station.upper()}")
 
         print(
-            f"  Personal: {staff}"
+            f"  Personal: {len(manager.staff)}"
         )
 
         print(
-            f"  Rum: {rooms}"
+            f"  Rum: {len(manager.rooms)}"
         )
 
         print(
-            f"  Samtidiga behandlingsplatser: {capacity}"
+            f"  Teoretisk kapacitet: "
+            f"{theoretical_capacity:.1f} behandlingar"
         )
 
         print(
@@ -656,8 +971,13 @@ def print_capacity_report(resources):
         )
 
         print(
-            f"  Utnyttjande under öppettid: "
-            f"{utilization:.1f}%"
+            f"  Personalbeläggning: "
+            f"{staff_utilization:.1f}%"
+        )
+
+        print(
+            f"  Rumsbeläggning: "
+            f"{room_utilization:.1f}%"
         )
 
         print(
@@ -666,33 +986,109 @@ def print_capacity_report(resources):
         )
 
         print(
-            f"  Längsta registrerade väntetid: "
-            f"{max_wait:.1f} minuter"
+            f"  Längsta väntetid: "
+            f"{maximum_wait:.1f} minuter"
         )
 
         print(
             f"  Största observerade kö: "
-            f"{stats['station_max_queue'][station]} patienter"
+            f"{stats['station_max_queue'][station]}"
         )
 
         print(
             f"  Behandlingar som inte hann starta: "
-            f"{stats['patients_not_started'][station]}"
+            f"{stats['station_not_started'][station]}"
         )
 
     # --------------------------------------------------------
-    # TOTAL VÄNTETID OCH PATIENTTID
+    # INDIVIDUELL PERSONALBELÄGGNING
     # --------------------------------------------------------
 
-    print("\n" + "-" * 65)
-    print("4. PATIENTUPPLEVELSE")
-    print("-" * 65)
+    print("\n" + "-" * 70)
+    print("3. BELÄGGNING PER ANSTÄLLD")
+    print("-" * 70)
+
+    for station, employees in CONFIG["staff_schedules"].items():
+
+        print(f"\n{station.upper()}")
+
+        for original_employee in employees:
+
+            name = original_employee["name"]
+
+            # Tillgänglighet räknas i minuter efter öppning.
+            # Här behöver vi inte konvertera eftersom
+            # öppettiden också räknas i samma referens.
+            employee = original_employee.copy()
+
+            employee["start"] += OPENING_MINUTE
+            employee["end"] += OPENING_MINUTE
+            employee["lunch_start"] += OPENING_MINUTE
+
+            available = calculate_staff_availability(
+                employee
+            )
+
+            busy = stats["staff_busy_open"][name]
+
+            utilization = (
+
+                busy / available * 100
+
+                if available > 0 else 0
+            )
+
+            print(
+                f"  {name:15s} "
+                f"Beläggning: {utilization:5.1f}% "
+                f"Tillgänglig: {available:5.0f} min "
+                f"Behandling: {busy:5.1f} min"
+            )
+
+    # --------------------------------------------------------
+    # INDIVIDUELL RUMSBELÄGGNING
+    # --------------------------------------------------------
+
+    print("\n" + "-" * 70)
+    print("4. BELÄGGNING PER BEHANDLINGSRUM")
+    print("-" * 70)
+
+    for station, manager in managers.items():
+
+        print(f"\n{station.upper()}")
+
+        for room in manager.rooms:
+
+            busy = stats["room_busy_open"][room]
+
+            available = OPENING_DURATION
+
+            utilization = (
+
+                busy / available * 100
+
+                if available > 0 else 0
+            )
+
+            print(
+                f"  {room:20s} "
+                f"Beläggning: {utilization:5.1f}% "
+                f"Behandling: {busy:5.1f} min"
+            )
+
+    # --------------------------------------------------------
+    # PATIENTUPPLEVELSE
+    # --------------------------------------------------------
+
+    print("\n" + "-" * 70)
+    print("5. PATIENTUPPLEVELSE")
+    print("-" * 70)
 
     all_waits = []
 
-    for waits in stats["station_waits"].values():
+    for station_waits in stats["station_waits"].values():
 
-        all_waits.extend(waits)
+        all_waits.extend(station_waits)
 
     if all_waits:
 
@@ -718,34 +1114,45 @@ def print_capacity_report(resources):
     # ÖVERTID
     # --------------------------------------------------------
 
-    print("\n" + "-" * 65)
-    print("5. ÖVERTID")
-    print("-" * 65)
+    print("\n" + "-" * 70)
+    print("6. BEHANDLINGSTID EFTER STÄNGNING")
+    print("-" * 70)
 
-    for station in station_settings:
+    for station, manager in managers.items():
 
-        total_busy = stats["station_busy_total"][station]
+        staff_overtime = sum(
 
-        busy_open = stats["station_busy_open"][station]
+            stats["staff_busy_total"][employee["name"]]
+            - stats["staff_busy_open"][employee["name"]]
 
-        overtime = max(0, total_busy - busy_open)
-
-        print(
-            f"{station.upper():10s}: "
-            f"{overtime:.1f} minuter behandlingstid efter stängning"
+            for employee in manager.staff
         )
 
-    print("\n" + "=" * 65)
-    print("                  SIMULERING AVSLUTAD")
-    print("=" * 65)
+        room_overtime = sum(
+
+            stats["room_busy_total"][room]
+            - stats["room_busy_open"][room]
+
+            for room in manager.rooms
+        )
+
+        print(
+            f"{station.upper():10s} "
+            f"Personal: {staff_overtime:.1f} min "
+            f"Rum: {room_overtime:.1f} min"
+        )
+
+    print("\n" + "=" * 70)
+    print("                 SIMULERING AVSLUTAD")
+    print("=" * 70)
 
 
 # ============================================================
-# 13. STARTA PROGRAMMET
+# 13. STARTA CLINICFLOW
 # ============================================================
 
 if __name__ == "__main__":
 
-    resources = run_clinic_day()
+    managers = run_clinic_day()
 
-    print_capacity_report(resources)
+    print_capacity_report(managers)
