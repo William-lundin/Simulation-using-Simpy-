@@ -1,0 +1,328 @@
+{
+    "metadata": {
+        "project": "ClinicFlow",
+        "export_timestamp_utc": "2026-11-15T21:25:41.087829+00:00",
+        "purpose": "Neutral simulation data for external analysis",
+        "recommendations_generated": false
+    },
+    "instructions": {
+        "role": "Analyze the supplied clinic simulation data.",
+        "requirements": [
+            "Analyze the data without assuming a predefined bottleneck.",
+            "Identify relevant patterns and relationships.",
+            "Distinguish observations from causal explanations.",
+            "Consider uncertainty and variation between replications.",
+            "Do not treat simulated results as real clinical evidence.",
+            "Propose hypotheses that can be tested in further simulations.",
+            "Do not claim that a proposed change is effective before it has been simulated."
+        ]
+    },
+    "clinic_configuration": {
+        "clinic": {
+            "clinic": {
+                "name": "ClinicFlow",
+                "opening_hour": 8,
+                "closing_hour": 16
+            },
+            "stations": {
+                "nurse": {
+                    "staff": 3,
+                    "rooms": 3,
+                    "service_time_mean": 12,
+                    "service_time_std": 3
+                },
+                "doctor": {
+                    "staff": 4,
+                    "rooms": 2,
+                    "service_time_mean": 20,
+                    "service_time_std": 5
+                },
+                "lab": {
+                    "staff": 2,
+                    "rooms": 2,
+                    "service_time_mean": 10,
+                    "service_time_std": 2
+                }
+            },
+            "patient_types": {
+                "nurse_only": {
+                    "route": [
+                        "nurse"
+                    ]
+                },
+                "doctor_only": {
+                    "route": [
+                        "doctor"
+                    ]
+                },
+                "nurse_doctor": {
+                    "route": [
+                        "nurse",
+                        "doctor"
+                    ]
+                },
+                "nurse_lab": {
+                    "route": [
+                        "nurse",
+                        "lab"
+                    ]
+                }
+            },
+            "simulation": {
+                "days": 30,
+                "replications": 30,
+                "random_seed": 42,
+                "arrival_deviation_std": 3,
+                "no_show_probability": 0.05
+            }
+        },
+        "scheduling": {
+            "booking_rules": {
+                "nurse_only": {
+                    "interval_minutes": 20,
+                    "first_offset_minutes": 0
+                },
+                "doctor_only": {
+                    "interval_minutes": 20,
+                    "first_offset_minutes": 5
+                },
+                "nurse_doctor": {
+                    "interval_minutes": 30,
+                    "first_offset_minutes": 10
+                },
+                "nurse_lab": {
+                    "interval_minutes": 30,
+                    "first_offset_minutes": 15
+                }
+            }
+        },
+        "objectives": {
+            "weights": {
+                "waiting_time": 0.4,
+                "unfinished_patients": 0.25,
+                "overtime": 0.15,
+                "staff_idle_time": 0.1,
+                "resource_imbalance": 0.1
+            },
+            "targets": {
+                "waiting_time_minutes": 30,
+                "unfinished_patient_rate": 0.02,
+                "overtime_minutes": 30,
+                "staff_idle_rate": 0.3,
+                "utilization_difference": 0.2
+            },
+            "constraints": {
+                "maximum_unfinished_patient_rate": 0.05,
+                "maximum_overtime_minutes": 60
+            },
+            "search": {
+                "interval_multipliers": [
+                    0.8,
+                    0.9,
+                    1.1,
+                    1.2
+                ],
+                "offset_shifts": [
+                    -10,
+                    10
+                ]
+            }
+        }
+    },
+    "simulation_summary": {
+        "patients_booked": {
+            "mean": 2400,
+            "median": 2400.0,
+            "p90": 2400.0,
+            "confidence_interval_95": {
+                "lower": 2400.0,
+                "upper": 2400.0
+            }
+        },
+        "patients_arrived": {
+            "mean": 2280.3,
+            "median": 2278.5,
+            "p90": 2292.3,
+            "confidence_interval_95": {
+                "lower": 2276.263292499044,
+                "upper": 2284.3367075009564
+            }
+        },
+        "patients_completed": {
+            "mean": 2271.233333333333,
+            "median": 2268.0,
+            "p90": 2286.1,
+            "confidence_interval_95": {
+                "lower": 2266.954967469194,
+                "upper": 2275.5116991974724
+            }
+        },
+        "patients_unfinished": {
+            "mean": 9.066666666666666,
+            "median": 9.0,
+            "p90": 12.100000000000001,
+            "confidence_interval_95": {
+                "lower": 8.200601588103563,
+                "upper": 9.93273174522977
+            }
+        },
+        "patients_no_show": {
+            "mean": 119.7,
+            "median": 121.5,
+            "p90": 130.3,
+            "confidence_interval_95": {
+                "lower": 115.66329249904382,
+                "upper": 123.73670750095619
+            }
+        },
+        "average_wait_minutes": {
+            "mean": 0.7354125748564557,
+            "median": 0.7359229041970526,
+            "p90": 0.8051517872543735,
+            "confidence_interval_95": {
+                "lower": 0.7092144291941749,
+                "upper": 0.7616107205187366
+            }
+        },
+        "average_time_in_clinic": {
+            "mean": 21.11025288005786,
+            "median": 21.118879974902413,
+            "p90": 21.265867761633324,
+            "confidence_interval_95": {
+                "lower": 21.05992955648677,
+                "upper": 21.16057620362895
+            }
+        },
+        "unfinished_patient_rate": {
+            "mean": 0.003977085946224331,
+            "median": 0.003943909609232642,
+            "p90": 0.005338137391814326,
+            "confidence_interval_95": {
+                "lower": 0.0035956997153133727,
+                "upper": 0.004358472177135289
+            }
+        },
+        "overtime_minutes": {
+            "mean": 656.1780528780272,
+            "median": 658.018369546317,
+            "p90": 743.6668875606226,
+            "confidence_interval_95": {
+                "lower": 636.7923569631369,
+                "upper": 675.5637487929175
+            }
+        },
+        "staff_idle_rate": {
+            "mean": 0.5395538101269285,
+            "median": 0.5399522451775227,
+            "p90": 0.5421994343556331,
+            "confidence_interval_95": {
+                "lower": 0.5384552406119271,
+                "upper": 0.5406523796419299
+            }
+        },
+        "resource_imbalance": {
+            "mean": 0.6344690313313868,
+            "median": 0.6339945018158973,
+            "p90": 0.645327467894548,
+            "confidence_interval_95": {
+                "lower": 0.6313386810610184,
+                "upper": 0.6375993816017551
+            }
+        }
+    },
+    "station_statistics": {
+        "nurse": {
+            "average_wait_minutes": {
+                "mean": 0.010405026710245218,
+                "p90": 0.014976883272099535
+            },
+            "utilization": {
+                "mean": 0.443999117121951,
+                "p90": 0.449560237631242
+            },
+            "busy_minutes": {
+                "mean": 19180.76185966828,
+                "p90": 19421.002265669653
+            },
+            "idle_minutes": {
+                "mean": 24019.23814033172,
+                "p90": 24244.137361408055
+            },
+            "overtime_minutes": {
+                "mean": 22.37816026111083,
+                "p90": 34.27036869334854
+            },
+            "max_queue": {
+                "mean": 0,
+                "p90": 0.0
+            }
+        },
+        "doctor": {
+            "average_wait_minutes": {
+                "mean": 1.4563231805558428,
+                "p90": 1.5990392313836492
+            },
+            "utilization": {
+                "mean": 0.7900160101021053,
+                "p90": 0.8003669232455328
+            },
+            "busy_minutes": {
+                "mean": 22752.461090940633,
+                "p90": 23050.567389471344
+            },
+            "idle_minutes": {
+                "mean": 6047.538909059367,
+                "p90": 6295.150875178712
+            },
+            "overtime_minutes": {
+                "mean": 515.733250197453,
+                "p90": 586.0072357335227
+            },
+            "max_queue": {
+                "mean": 0,
+                "p90": 0.0
+            }
+        },
+        "lab": {
+            "average_wait_minutes": {
+                "mean": 0.0,
+                "p90": 0.0
+            },
+            "utilization": {
+                "mean": 0.15554697877071852,
+                "p90": 0.15809331913122665
+            },
+            "busy_minutes": {
+                "mean": 4479.752988596693,
+                "p90": 4553.087590979328
+            },
+            "idle_minutes": {
+                "mean": 24320.247011403306,
+                "p90": 24386.715596898703
+            },
+            "overtime_minutes": {
+                "mean": 118.06664241946336,
+                "p90": 144.36401054884598
+            },
+            "max_queue": {
+                "mean": 0,
+                "p90": 0.0
+            }
+        }
+    },
+    "simulation_metadata": {
+        "replications": 30,
+        "days_per_replication": 30
+    },
+    "raw_data_file": "outputs/simulation_raw_data.json",
+    "raw_data_description": {
+        "location": "outputs/simulation_raw_data.json",
+        "contents": [
+            "Full clinic configuration",
+            "Patient-level simulation records, if provided by metrics.py",
+            "Station-level simulation records",
+            "Replication-level results",
+            "Simulation metadata"
+        ]
+    }
+}

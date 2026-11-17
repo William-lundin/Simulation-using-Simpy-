@@ -1,0 +1,1567 @@
+{
+    "metadata": {
+        "project": "ClinicFlow",
+        "export_timestamp_utc": "2026-11-15T21:25:41.087829+00:00",
+        "purpose": "Neutral simulation data for external analysis",
+        "recommendations_generated": false
+    },
+    "configuration": {
+        "clinic": {
+            "clinic": {
+                "name": "ClinicFlow",
+                "opening_hour": 8,
+                "closing_hour": 16
+            },
+            "stations": {
+                "nurse": {
+                    "staff": 3,
+                    "rooms": 3,
+                    "service_time_mean": 12,
+                    "service_time_std": 3
+                },
+                "doctor": {
+                    "staff": 4,
+                    "rooms": 2,
+                    "service_time_mean": 20,
+                    "service_time_std": 5
+                },
+                "lab": {
+                    "staff": 2,
+                    "rooms": 2,
+                    "service_time_mean": 10,
+                    "service_time_std": 2
+                }
+            },
+            "patient_types": {
+                "nurse_only": {
+                    "route": [
+                        "nurse"
+                    ]
+                },
+                "doctor_only": {
+                    "route": [
+                        "doctor"
+                    ]
+                },
+                "nurse_doctor": {
+                    "route": [
+                        "nurse",
+                        "doctor"
+                    ]
+                },
+                "nurse_lab": {
+                    "route": [
+                        "nurse",
+                        "lab"
+                    ]
+                }
+            },
+            "simulation": {
+                "days": 30,
+                "replications": 30,
+                "random_seed": 42,
+                "arrival_deviation_std": 3,
+                "no_show_probability": 0.05
+            }
+        },
+        "scheduling": {
+            "booking_rules": {
+                "nurse_only": {
+                    "interval_minutes": 20,
+                    "first_offset_minutes": 0
+                },
+                "doctor_only": {
+                    "interval_minutes": 20,
+                    "first_offset_minutes": 5
+                },
+                "nurse_doctor": {
+                    "interval_minutes": 30,
+                    "first_offset_minutes": 10
+                },
+                "nurse_lab": {
+                    "interval_minutes": 30,
+                    "first_offset_minutes": 15
+                }
+            }
+        },
+        "objectives": {
+            "weights": {
+                "waiting_time": 0.4,
+                "unfinished_patients": 0.25,
+                "overtime": 0.15,
+                "staff_idle_time": 0.1,
+                "resource_imbalance": 0.1
+            },
+            "targets": {
+                "waiting_time_minutes": 30,
+                "unfinished_patient_rate": 0.02,
+                "overtime_minutes": 30,
+                "staff_idle_rate": 0.3,
+                "utilization_difference": 0.2
+            },
+            "constraints": {
+                "maximum_unfinished_patient_rate": 0.05,
+                "maximum_overtime_minutes": 60
+            },
+            "search": {
+                "interval_multipliers": [
+                    0.8,
+                    0.9,
+                    1.1,
+                    1.2
+                ],
+                "offset_shifts": [
+                    -10,
+                    10
+                ]
+            }
+        }
+    },
+    "simulation_results": {
+        "replications": 30,
+        "days_per_replication": 30,
+        "summary": {
+            "patients_booked": {
+                "mean": 2400,
+                "median": 2400.0,
+                "p90": 2400.0,
+                "confidence_interval_95": {
+                    "lower": 2400.0,
+                    "upper": 2400.0
+                }
+            },
+            "patients_arrived": {
+                "mean": 2280.3,
+                "median": 2278.5,
+                "p90": 2292.3,
+                "confidence_interval_95": {
+                    "lower": 2276.263292499044,
+                    "upper": 2284.3367075009564
+                }
+            },
+            "patients_completed": {
+                "mean": 2271.233333333333,
+                "median": 2268.0,
+                "p90": 2286.1,
+                "confidence_interval_95": {
+                    "lower": 2266.954967469194,
+                    "upper": 2275.5116991974724
+                }
+            },
+            "patients_unfinished": {
+                "mean": 9.066666666666666,
+                "median": 9.0,
+                "p90": 12.100000000000001,
+                "confidence_interval_95": {
+                    "lower": 8.200601588103563,
+                    "upper": 9.93273174522977
+                }
+            },
+            "patients_no_show": {
+                "mean": 119.7,
+                "median": 121.5,
+                "p90": 130.3,
+                "confidence_interval_95": {
+                    "lower": 115.66329249904382,
+                    "upper": 123.73670750095619
+                }
+            },
+            "average_wait_minutes": {
+                "mean": 0.7354125748564557,
+                "median": 0.7359229041970526,
+                "p90": 0.8051517872543735,
+                "confidence_interval_95": {
+                    "lower": 0.7092144291941749,
+                    "upper": 0.7616107205187366
+                }
+            },
+            "average_time_in_clinic": {
+                "mean": 21.11025288005786,
+                "median": 21.118879974902413,
+                "p90": 21.265867761633324,
+                "confidence_interval_95": {
+                    "lower": 21.05992955648677,
+                    "upper": 21.16057620362895
+                }
+            },
+            "unfinished_patient_rate": {
+                "mean": 0.003977085946224331,
+                "median": 0.003943909609232642,
+                "p90": 0.005338137391814326,
+                "confidence_interval_95": {
+                    "lower": 0.0035956997153133727,
+                    "upper": 0.004358472177135289
+                }
+            },
+            "overtime_minutes": {
+                "mean": 656.1780528780272,
+                "median": 658.018369546317,
+                "p90": 743.6668875606226,
+                "confidence_interval_95": {
+                    "lower": 636.7923569631369,
+                    "upper": 675.5637487929175
+                }
+            },
+            "staff_idle_rate": {
+                "mean": 0.5395538101269285,
+                "median": 0.5399522451775227,
+                "p90": 0.5421994343556331,
+                "confidence_interval_95": {
+                    "lower": 0.5384552406119271,
+                    "upper": 0.5406523796419299
+                }
+            },
+            "resource_imbalance": {
+                "mean": 0.6344690313313868,
+                "median": 0.6339945018158973,
+                "p90": 0.645327467894548,
+                "confidence_interval_95": {
+                    "lower": 0.6313386810610184,
+                    "upper": 0.6375993816017551
+                }
+            }
+        },
+        "stations": {
+            "nurse": {
+                "average_wait_minutes": {
+                    "mean": 0.010405026710245218,
+                    "p90": 0.014976883272099535
+                },
+                "utilization": {
+                    "mean": 0.443999117121951,
+                    "p90": 0.449560237631242
+                },
+                "busy_minutes": {
+                    "mean": 19180.76185966828,
+                    "p90": 19421.002265669653
+                },
+                "idle_minutes": {
+                    "mean": 24019.23814033172,
+                    "p90": 24244.137361408055
+                },
+                "overtime_minutes": {
+                    "mean": 22.37816026111083,
+                    "p90": 34.27036869334854
+                },
+                "max_queue": {
+                    "mean": 0,
+                    "p90": 0.0
+                }
+            },
+            "doctor": {
+                "average_wait_minutes": {
+                    "mean": 1.4563231805558428,
+                    "p90": 1.5990392313836492
+                },
+                "utilization": {
+                    "mean": 0.7900160101021053,
+                    "p90": 0.8003669232455328
+                },
+                "busy_minutes": {
+                    "mean": 22752.461090940633,
+                    "p90": 23050.567389471344
+                },
+                "idle_minutes": {
+                    "mean": 6047.538909059367,
+                    "p90": 6295.150875178712
+                },
+                "overtime_minutes": {
+                    "mean": 515.733250197453,
+                    "p90": 586.0072357335227
+                },
+                "max_queue": {
+                    "mean": 0,
+                    "p90": 0.0
+                }
+            },
+            "lab": {
+                "average_wait_minutes": {
+                    "mean": 0.0,
+                    "p90": 0.0
+                },
+                "utilization": {
+                    "mean": 0.15554697877071852,
+                    "p90": 0.15809331913122665
+                },
+                "busy_minutes": {
+                    "mean": 4479.752988596693,
+                    "p90": 4553.087590979328
+                },
+                "idle_minutes": {
+                    "mean": 24320.247011403306,
+                    "p90": 24386.715596898703
+                },
+                "overtime_minutes": {
+                    "mean": 118.06664241946336,
+                    "p90": 144.36401054884598
+                },
+                "max_queue": {
+                    "mean": 0,
+                    "p90": 0.0
+                }
+            }
+        },
+        "raw_replications": [
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2273,
+                "patients_completed": 2264,
+                "patients_unfinished": 9,
+                "patients_no_show": 127,
+                "average_wait_minutes": 0.788106868513078,
+                "average_time_in_clinic": 21.15024949093801,
+                "unfinished_patient_rate": 0.003959524857017158,
+                "overtime_minutes": 567.9128980458427,
+                "staff_idle_rate": 0.5413120989757697,
+                "resource_imbalance": 0.6318201578267442,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.005980832454811494,
+                        "utilization": 0.4405859446548258,
+                        "busy_minutes": 19033.312809088475,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24166.687190911525,
+                        "overtime_minutes": 16.655016694405845,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5754495713503598,
+                        "utilization": 0.7881744472146559,
+                        "busy_minutes": 22699.42407978209,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6100.575920217911,
+                        "overtime_minutes": 433.1144610134544,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1563542893879117,
+                        "busy_minutes": 4503.003534371857,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24296.996465628145,
+                        "overtime_minutes": 118.14342033798243,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2281,
+                "patients_completed": 2268,
+                "patients_unfinished": 13,
+                "patients_no_show": 119,
+                "average_wait_minutes": 0.7765848409316872,
+                "average_time_in_clinic": 21.128608482719965,
+                "unfinished_patient_rate": 0.005699254712845244,
+                "overtime_minutes": 659.3294460423456,
+                "staff_idle_rate": 0.5401375186615106,
+                "resource_imbalance": 0.6342664808167623,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.006116953969295551,
+                        "utilization": 0.4468854379342167,
+                        "busy_minutes": 19305.45091875816,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23894.54908124184,
+                        "overtime_minutes": 30.971786277420904,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.541225937599487,
+                        "utilization": 0.7867285043000751,
+                        "busy_minutes": 22657.780923842165,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6142.219076157835,
+                        "overtime_minutes": 532.6364255430296,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15246202348331286,
+                        "busy_minutes": 4390.906276319411,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24409.09372368059,
+                        "overtime_minutes": 95.72123422189509,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2265,
+                "patients_completed": 2259,
+                "patients_unfinished": 6,
+                "patients_no_show": 135,
+                "average_wait_minutes": 0.7565330066490288,
+                "average_time_in_clinic": 21.147547906177344,
+                "unfinished_patient_rate": 0.0026490066225165563,
+                "overtime_minutes": 649.8315419624812,
+                "staff_idle_rate": 0.5421202153613875,
+                "resource_imbalance": 0.6272702584220803,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.007200885720637396,
+                        "utilization": 0.44248410171434865,
+                        "busy_minutes": 19115.31319405986,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24084.68680594014,
+                        "overtime_minutes": 18.63834381659842,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5010316231229657,
+                        "utilization": 0.7830616760428504,
+                        "busy_minutes": 22552.17627003409,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6247.823729965909,
+                        "overtime_minutes": 487.74713370557674,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15579141762077006,
+                        "busy_minutes": 4486.792827478178,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24313.207172521823,
+                        "overtime_minutes": 143.44606444030603,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2279,
+                "patients_completed": 2265,
+                "patients_unfinished": 14,
+                "patients_no_show": 121,
+                "average_wait_minutes": 0.6453996264850693,
+                "average_time_in_clinic": 20.93754213823555,
+                "unfinished_patient_rate": 0.00614304519526108,
+                "overtime_minutes": 705.591695211743,
+                "staff_idle_rate": 0.5418877501417908,
+                "resource_imbalance": 0.6321646364250632,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.011781562444539274,
+                        "utilization": 0.4418559653071032,
+                        "busy_minutes": 19088.177701266857,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24111.822298733143,
+                        "overtime_minutes": 32.87180226596615,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.2782757772096929,
+                        "utilization": 0.7863867814840703,
+                        "busy_minutes": 22647.939306741224,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6152.060693258776,
+                        "overtime_minutes": 558.8773810628948,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1542221450590071,
+                        "busy_minutes": 4441.597777699405,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24358.402222300596,
+                        "overtime_minutes": 113.84251188288198,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2275,
+                "patients_completed": 2262,
+                "patients_unfinished": 13,
+                "patients_no_show": 125,
+                "average_wait_minutes": 0.715609746891239,
+                "average_time_in_clinic": 21.265310779888456,
+                "unfinished_patient_rate": 0.005714285714285714,
+                "overtime_minutes": 645.5221061088957,
+                "staff_idle_rate": 0.5367549231058485,
+                "resource_imbalance": 0.6366696305016479,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.009334080086263918,
+                        "utilization": 0.4470465526178446,
+                        "busy_minutes": 19312.411073090887,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23887.588926909113,
+                        "overtime_minutes": 34.839331625502325,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.4100737031817987,
+                        "utilization": 0.7937287853522057,
+                        "busy_minutes": 22859.389018143524,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5940.610981856476,
+                        "overtime_minutes": 509.32244465199216,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15705915485055774,
+                        "busy_minutes": 4523.303659696063,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24276.696340303937,
+                        "overtime_minutes": 101.36032983140132,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2272,
+                "patients_completed": 2262,
+                "patients_unfinished": 10,
+                "patients_no_show": 128,
+                "average_wait_minutes": 0.7323127131339381,
+                "average_time_in_clinic": 21.07332644711768,
+                "unfinished_patient_rate": 0.0044014084507042256,
+                "overtime_minutes": 695.4220374789696,
+                "staff_idle_rate": 0.542033299147751,
+                "resource_imbalance": 0.6367479956963173,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.014801963655692876,
+                        "utilization": 0.4387925698419348,
+                        "busy_minutes": 18955.839017171584,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24244.160982828416,
+                        "overtime_minutes": 15.487998696673344,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.4350909588408285,
+                        "utilization": 0.7907212969581433,
+                        "busy_minutes": 22772.773352394528,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6027.226647605472,
+                        "overtime_minutes": 583.6447384092573,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1539733012618259,
+                        "busy_minutes": 4434.431076340586,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24365.568923659415,
+                        "overtime_minutes": 96.28930037303894,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2281,
+                "patients_completed": 2269,
+                "patients_unfinished": 12,
+                "patients_no_show": 119,
+                "average_wait_minutes": 0.7285702716884486,
+                "average_time_in_clinic": 21.104424187683115,
+                "unfinished_patient_rate": 0.00526085050416484,
+                "overtime_minutes": 590.4613003812138,
+                "staff_idle_rate": 0.5396427103063668,
+                "resource_imbalance": 0.6270485254969289,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.008658973603343728,
+                        "utilization": 0.45055666948759876,
+                        "busy_minutes": 19464.048121864267,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23735.951878135733,
+                        "overtime_minutes": 22.030512352974597,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.4456115035164865,
+                        "utilization": 0.7812320175966235,
+                        "busy_minutes": 22499.482106782758,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6300.517893217242,
+                        "overtime_minutes": 486.66444699849956,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15418349209969467,
+                        "busy_minutes": 4440.484572471207,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24359.515427528793,
+                        "overtime_minutes": 81.76634102973969,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2287,
+                "patients_completed": 2278,
+                "patients_unfinished": 9,
+                "patients_no_show": 113,
+                "average_wait_minutes": 0.8026339942463566,
+                "average_time_in_clinic": 21.08779669640796,
+                "unfinished_patient_rate": 0.003935286401399213,
+                "overtime_minutes": 748.5988526690453,
+                "staff_idle_rate": 0.5400138598773645,
+                "resource_imbalance": 0.6460431320478058,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.009447098725112664,
+                        "utilization": 0.4375345313147437,
+                        "busy_minutes": 18901.491752796926,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24298.508247203074,
+                        "overtime_minutes": 15.511852654192978,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.579030314020762,
+                        "utilization": 0.7998464127524573,
+                        "busy_minutes": 23035.576687270768,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5764.423312729232,
+                        "overtime_minutes": 609.0062907597305,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15380328070465146,
+                        "busy_minutes": 4429.534484293962,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24370.465515706037,
+                        "overtime_minutes": 124.08070925512186,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2302,
+                "patients_completed": 2292,
+                "patients_unfinished": 10,
+                "patients_no_show": 98,
+                "average_wait_minutes": 0.7599130506751401,
+                "average_time_in_clinic": 21.202954874564238,
+                "unfinished_patient_rate": 0.004344048653344918,
+                "overtime_minutes": 660.7291149571876,
+                "staff_idle_rate": 0.5337740071990098,
+                "resource_imbalance": 0.6428174188347124,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.008448760315891063,
+                        "utilization": 0.4495174001769809,
+                        "busy_minutes": 19419.151687645575,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23780.848312354425,
+                        "overtime_minutes": 20.694793453861735,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5001732420267557,
+                        "utilization": 0.8001661466863534,
+                        "busy_minutes": 23044.78502456698,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5755.21497543302,
+                        "overtime_minutes": 526.4644379533793,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15734872785164103,
+                        "busy_minutes": 4531.643362127262,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24268.356637872737,
+                        "overtime_minutes": 113.56988354994655,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2273,
+                "patients_completed": 2266,
+                "patients_unfinished": 7,
+                "patients_no_show": 127,
+                "average_wait_minutes": 0.7046120528071098,
+                "average_time_in_clinic": 21.10915146708486,
+                "unfinished_patient_rate": 0.0030796304443466782,
+                "overtime_minutes": 698.9693559296438,
+                "staff_idle_rate": 0.5402000004474523,
+                "resource_imbalance": 0.6367625345752134,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.008985081953779783,
+                        "utilization": 0.4405092276887218,
+                        "busy_minutes": 19029.99863615278,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24170.00136384722,
+                        "overtime_minutes": 11.606573379146539,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.389974453779136,
+                        "utilization": 0.7926493457380238,
+                        "busy_minutes": 22828.301157255086,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5971.698842744914,
+                        "overtime_minutes": 528.8565013278665,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15588681116281047,
+                        "busy_minutes": 4489.5401614889415,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24310.45983851106,
+                        "overtime_minutes": 158.5062812226309,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2283,
+                "patients_completed": 2274,
+                "patients_unfinished": 9,
+                "patients_no_show": 117,
+                "average_wait_minutes": 0.5958865714385869,
+                "average_time_in_clinic": 20.879482363790995,
+                "unfinished_patient_rate": 0.003942181340341655,
+                "overtime_minutes": 609.0094053647274,
+                "staff_idle_rate": 0.5409690562937638,
+                "resource_imbalance": 0.6276759201386365,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.012728193172660622,
+                        "utilization": 0.44760404410332266,
+                        "busy_minutes": 19336.49470526354,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23863.50529473646,
+                        "overtime_minutes": 23.174223516870768,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.1734407967639076,
+                        "utilization": 0.7814390784777396,
+                        "busy_minutes": 22505.445460158902,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6294.554539841098,
+                        "overtime_minutes": 460.04749630172967,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15376315833910317,
+                        "busy_minutes": 4428.378960166171,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24371.62103983383,
+                        "overtime_minutes": 125.78768554612697,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2285,
+                "patients_completed": 2276,
+                "patients_unfinished": 9,
+                "patients_no_show": 115,
+                "average_wait_minutes": 0.6780375596859527,
+                "average_time_in_clinic": 20.886535355469547,
+                "unfinished_patient_rate": 0.003938730853391685,
+                "overtime_minutes": 612.4604039161994,
+                "staff_idle_rate": 0.5420857211409067,
+                "resource_imbalance": 0.6340771315448266,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.010191877883600882,
+                        "utilization": 0.438545069124628,
+                        "busy_minutes": 18945.14698618393,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24254.85301381607,
+                        "overtime_minutes": 35.328702601753605,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.338979145679689,
+                        "utilization": 0.7894797519323555,
+                        "busy_minutes": 22737.01685565184,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6062.98314434816,
+                        "overtime_minutes": 437.9657274778939,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15540262038752892,
+                        "busy_minutes": 4475.595467160832,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24324.404532839166,
+                        "overtime_minutes": 139.16597383655193,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2272,
+                "patients_completed": 2261,
+                "patients_unfinished": 11,
+                "patients_no_show": 128,
+                "average_wait_minutes": 0.6963201183838623,
+                "average_time_in_clinic": 21.037814167068262,
+                "unfinished_patient_rate": 0.0048415492957746475,
+                "overtime_minutes": 596.0202178713043,
+                "staff_idle_rate": 0.5420553637289569,
+                "resource_imbalance": 0.6337241095751704,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.016551159819759447,
+                        "utilization": 0.4404065458262948,
+                        "busy_minutes": 19025.562779695934,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24174.437220304066,
+                        "overtime_minutes": 18.126385572500567,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.3743428155250506,
+                        "utilization": 0.7879602588921896,
+                        "busy_minutes": 22693.25545609506,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6106.744543904941,
+                        "overtime_minutes": 492.49956827688374,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1542361493170191,
+                        "busy_minutes": 4442.00110033015,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24357.998899669852,
+                        "overtime_minutes": 85.39426402191998,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2292,
+                "patients_completed": 2286,
+                "patients_unfinished": 6,
+                "patients_no_show": 108,
+                "average_wait_minutes": 0.720647126477621,
+                "average_time_in_clinic": 21.04745687226895,
+                "unfinished_patient_rate": 0.002617801047120419,
+                "overtime_minutes": 662.609059227347,
+                "staff_idle_rate": 0.5381827243956533,
+                "resource_imbalance": 0.6281291879515225,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.0096901347035924,
+                        "utilization": 0.4459393264996083,
+                        "busy_minutes": 19264.57890478308,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23935.42109521692,
+                        "overtime_minutes": 16.95774946268193,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.4364548700736817,
+                        "utilization": 0.7877903314086616,
+                        "busy_minutes": 22688.361544569456,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6111.638455430544,
+                        "overtime_minutes": 520.0466806131569,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15966114345713914,
+                        "busy_minutes": 4598.240931565607,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24201.759068434392,
+                        "overtime_minutes": 125.6046291515081,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2295,
+                "patients_completed": 2287,
+                "patients_unfinished": 8,
+                "patients_no_show": 105,
+                "average_wait_minutes": 0.9211273730862746,
+                "average_time_in_clinic": 21.37708260529823,
+                "unfinished_patient_rate": 0.003485838779956427,
+                "overtime_minutes": 762.0258903945535,
+                "staff_idle_rate": 0.5347304805239227,
+                "resource_imbalance": 0.6553784560036593,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.011678804439098705,
+                        "utilization": 0.4419106705041598,
+                        "busy_minutes": 19090.540965779703,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24109.459034220297,
+                        "overtime_minutes": 24.855618173514756,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.8219401402641806,
+                        "utilization": 0.8104778842068452,
+                        "busy_minutes": 23341.76306515714,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5458.236934842858,
+                        "overtime_minutes": 607.269711651911,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15509942820318587,
+                        "busy_minutes": 4466.863532251753,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24333.13646774825,
+                        "overtime_minutes": 129.90056056912772,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2272,
+                "patients_completed": 2264,
+                "patients_unfinished": 8,
+                "patients_no_show": 128,
+                "average_wait_minutes": 0.8478358241458224,
+                "average_time_in_clinic": 21.40749508097109,
+                "unfinished_patient_rate": 0.0035211267605633804,
+                "overtime_minutes": 770.7429892800317,
+                "staff_idle_rate": 0.5370947064268395,
+                "resource_imbalance": 0.6452479496552971,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.013613850091014673,
+                        "utilization": 0.44071243507004365,
+                        "busy_minutes": 19038.777195025887,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24161.222804974113,
+                        "overtime_minutes": 26.55532541291001,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.669341502116688,
+                        "utilization": 0.8021739122781467,
+                        "busy_minutes": 23102.608673610626,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5697.391326389374,
+                        "overtime_minutes": 645.3145145724986,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15692596262284966,
+                        "busy_minutes": 4519.4677235380705,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24280.53227646193,
+                        "overtime_minutes": 98.87314929462309,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2270,
+                "patients_completed": 2265,
+                "patients_unfinished": 5,
+                "patients_no_show": 130,
+                "average_wait_minutes": 0.7149724944149796,
+                "average_time_in_clinic": 21.02950473799819,
+                "unfinished_patient_rate": 0.0022026431718061676,
+                "overtime_minutes": 662.8545681951362,
+                "staff_idle_rate": 0.5429124053038437,
+                "resource_imbalance": 0.6308646060331901,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.026902074282531063,
+                        "utilization": 0.4416087301438305,
+                        "busy_minutes": 19077.497142213477,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24122.502857786523,
+                        "overtime_minutes": 15.887810091419567,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.3909854401973716,
+                        "utilization": 0.7841290461269957,
+                        "busy_minutes": 22582.916528457477,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6217.083471542523,
+                        "overtime_minutes": 521.4487657457944,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1532644400938057,
+                        "busy_minutes": 4414.015874701604,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24385.984125298397,
+                        "overtime_minutes": 125.5179923579222,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2286,
+                "patients_completed": 2280,
+                "patients_unfinished": 6,
+                "patients_no_show": 114,
+                "average_wait_minutes": 0.643117788584637,
+                "average_time_in_clinic": 20.93473217873741,
+                "unfinished_patient_rate": 0.0026246719160104987,
+                "overtime_minutes": 627.3039036253751,
+                "staff_idle_rate": 0.5399496302462445,
+                "resource_imbalance": 0.6248337780526192,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.0037043022002427213,
+                        "utilization": 0.4461865931756341,
+                        "busy_minutes": 19275.260825187393,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23924.739174812607,
+                        "overtime_minutes": 11.621579193206458,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.2855425571375692,
+                        "utilization": 0.782865091213656,
+                        "busy_minutes": 22546.514626953292,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6253.4853730467075,
+                        "overtime_minutes": 463.0567989064632,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15803131316103686,
+                        "busy_minutes": 4551.301819037862,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24248.69818096214,
+                        "overtime_minutes": 152.62552552570548,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2281,
+                "patients_completed": 2272,
+                "patients_unfinished": 9,
+                "patients_no_show": 119,
+                "average_wait_minutes": 0.7395330952601672,
+                "average_time_in_clinic": 21.10812507860777,
+                "unfinished_patient_rate": 0.00394563787812363,
+                "overtime_minutes": 678.5033255754325,
+                "staff_idle_rate": 0.5395944063696599,
+                "resource_imbalance": 0.6271124518651108,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.02463204604465506,
+                        "utilization": 0.4499457747195918,
+                        "busy_minutes": 19437.657467886365,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23762.342532113635,
+                        "overtime_minutes": 23.231213809048597,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.455291360847049,
+                        "utilization": 0.7818066837459566,
+                        "busy_minutes": 22516.03249188355,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6283.96750811645,
+                        "overtime_minutes": 540.9938941618154,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1546942318808459,
+                        "busy_minutes": 4455.193878168362,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24344.806121831636,
+                        "overtime_minutes": 114.27821760456851,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2317,
+                "patients_completed": 2309,
+                "patients_unfinished": 8,
+                "patients_no_show": 83,
+                "average_wait_minutes": 0.7987304569100624,
+                "average_time_in_clinic": 21.21296948233526,
+                "unfinished_patient_rate": 0.0034527406128614588,
+                "overtime_minutes": 555.7982720127702,
+                "staff_idle_rate": 0.5312623719014448,
+                "resource_imbalance": 0.6518123507882563,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.00527531924355766,
+                        "utilization": 0.45346189347911064,
+                        "busy_minutes": 19589.55379829758,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23610.44620170242,
+                        "overtime_minutes": 12.186637333983697,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.583936136547975,
+                        "utilization": 0.8061006044572668,
+                        "busy_minutes": 23215.697408369284,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5584.302591630716,
+                        "overtime_minutes": 419.4498166440328,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15428825366901053,
+                        "busy_minutes": 4443.501705667503,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24356.498294332498,
+                        "overtime_minutes": 124.16181803475376,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2267,
+                "patients_completed": 2258,
+                "patients_unfinished": 9,
+                "patients_no_show": 133,
+                "average_wait_minutes": 0.7238089411788182,
+                "average_time_in_clinic": 21.150972243319153,
+                "unfinished_patient_rate": 0.003970004411116012,
+                "overtime_minutes": 618.0685269566891,
+                "staff_idle_rate": 0.5412663246108204,
+                "resource_imbalance": 0.6408074032852621,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.010492544780306033,
+                        "utilization": 0.4417560263774085,
+                        "busy_minutes": 19083.860339504048,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24116.139660495952,
+                        "overtime_minutes": 24.26552890371022,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.437319237488614,
+                        "utilization": 0.791870613790639,
+                        "busy_minutes": 22805.873677170406,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5994.126322829594,
+                        "overtime_minutes": 503.8539634099091,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.151063210505377,
+                        "busy_minutes": 4350.620462554857,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24449.379537445144,
+                        "overtime_minutes": 89.9490346430697,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2276,
+                "patients_completed": 2268,
+                "patients_unfinished": 8,
+                "patients_no_show": 124,
+                "average_wait_minutes": 0.8068476534374376,
+                "average_time_in_clinic": 21.203151834428994,
+                "unfinished_patient_rate": 0.0035149384885764497,
+                "overtime_minutes": 641.3487171338139,
+                "staff_idle_rate": 0.5399548601088009,
+                "resource_imbalance": 0.6358916437966013,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.007558128804702918,
+                        "utilization": 0.44549695468272277,
+                        "busy_minutes": 19245.468442293623,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23954.531557706377,
+                        "overtime_minutes": 17.640389735440124,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.6059376408782713,
+                        "utilization": 0.7889021006958571,
+                        "busy_minutes": 22720.380500040683,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6079.619499959317,
+                        "overtime_minutes": 496.92239622292607,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15301045689925571,
+                        "busy_minutes": 4406.7011586985645,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24393.298841301435,
+                        "overtime_minutes": 126.78593117544773,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2278,
+                "patients_completed": 2266,
+                "patients_unfinished": 12,
+                "patients_no_show": 122,
+                "average_wait_minutes": 0.7687799033837688,
+                "average_time_in_clinic": 21.270880597337133,
+                "unfinished_patient_rate": 0.0052677787532923615,
+                "overtime_minutes": 592.0559829591728,
+                "staff_idle_rate": 0.5373344805336331,
+                "resource_imbalance": 0.6423663851953871,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.009952027113759131,
+                        "utilization": 0.44233608829513943,
+                        "busy_minutes": 19108.919014350024,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24091.080985649976,
+                        "overtime_minutes": 27.828411039794332,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5183262858882192,
+                        "utilization": 0.7990957854424809,
+                        "busy_minutes": 23013.95862074345,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5786.041379256549,
+                        "overtime_minutes": 448.88694363115263,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1567294002470938,
+                        "busy_minutes": 4513.806727116302,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24286.1932728837,
+                        "overtime_minutes": 115.34062828822584,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2288,
+                "patients_completed": 2283,
+                "patients_unfinished": 5,
+                "patients_no_show": 112,
+                "average_wait_minutes": 0.6157167541209998,
+                "average_time_in_clinic": 20.98177205099832,
+                "unfinished_patient_rate": 0.0021853146853146855,
+                "overtime_minutes": 659.8141936955357,
+                "staff_idle_rate": 0.5380656181795281,
+                "resource_imbalance": 0.6299356047939523,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.006598871062204913,
+                        "utilization": 0.44736874280911443,
+                        "busy_minutes": 19326.329689353744,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23873.670310646256,
+                        "overtime_minutes": 11.567187921633263,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.2264580232481985,
+                        "utilization": 0.787826413475966,
+                        "busy_minutes": 22689.400708107823,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6110.599291892177,
+                        "overtime_minutes": 537.564322370921,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15789080868201377,
+                        "busy_minutes": 4547.255290041997,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24252.744709958002,
+                        "overtime_minutes": 110.68268340298141,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2274,
+                "patients_completed": 2264,
+                "patients_unfinished": 10,
+                "patients_no_show": 126,
+                "average_wait_minutes": 0.777589739819977,
+                "average_time_in_clinic": 21.234180942997295,
+                "unfinished_patient_rate": 0.0043975373790677225,
+                "overtime_minutes": 659.5826623575713,
+                "staff_idle_rate": 0.5390496034192026,
+                "resource_imbalance": 0.6350425383800549,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.011337307337008204,
+                        "utilization": 0.4467284817923751,
+                        "busy_minutes": 19298.670413430606,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23901.329586569394,
+                        "overtime_minutes": 34.20715058977589,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5406203572541926,
+                        "utilization": 0.7891381018621415,
+                        "busy_minutes": 22727.177333629676,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6072.822666370324,
+                        "overtime_minutes": 515.2589310769877,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15409556348208664,
+                        "busy_minutes": 4437.952228284095,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24362.047771715905,
+                        "overtime_minutes": 110.11658069080767,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2280,
+                "patients_completed": 2273,
+                "patients_unfinished": 7,
+                "patients_no_show": 120,
+                "average_wait_minutes": 0.8049633576784775,
+                "average_time_in_clinic": 21.177308095219363,
+                "unfinished_patient_rate": 0.0030701754385964912,
+                "overtime_minutes": 680.8998342087757,
+                "staff_idle_rate": 0.5395352448442592,
+                "resource_imbalance": 0.6339118720869681,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.010307739680070984,
+                        "utilization": 0.44302941710515564,
+                        "busy_minutes": 19138.870818942723,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24061.129181057277,
+                        "overtime_minutes": 14.938425572120934,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5982727414398024,
+                        "utilization": 0.7904971947371637,
+                        "busy_minutes": 22766.319208430315,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6033.6807915696845,
+                        "overtime_minutes": 529.375798947905,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15658532265019565,
+                        "busy_minutes": 4509.657292325634,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24290.342707674365,
+                        "overtime_minutes": 136.58560968874986,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2272,
+                "patients_completed": 2261,
+                "patients_unfinished": 11,
+                "patients_no_show": 128,
+                "average_wait_minutes": 0.6234644140045936,
+                "average_time_in_clinic": 20.90738290878064,
+                "unfinished_patient_rate": 0.0048415492957746475,
+                "overtime_minutes": 656.7072930502883,
+                "staff_idle_rate": 0.543411885371817,
+                "resource_imbalance": 0.6228263051466152,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.010151346666854702,
+                        "utilization": 0.44433998435029076,
+                        "busy_minutes": 19195.48732393256,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24004.51267606744,
+                        "overtime_minutes": 38.02934583277607,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.234903579157676,
+                        "utilization": 0.7771873649099098,
+                        "busy_minutes": 22382.9961094054,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6417.0038905945985,
+                        "overtime_minutes": 522.0605708528952,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15436105976329467,
+                        "busy_minutes": 4445.5985211828865,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24354.40147881711,
+                        "overtime_minutes": 96.61737636461697,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2265,
+                "patients_completed": 2253,
+                "patients_unfinished": 12,
+                "patients_no_show": 135,
+                "average_wait_minutes": 0.6398008669614532,
+                "average_time_in_clinic": 20.868538304031695,
+                "unfinished_patient_rate": 0.005298013245033113,
+                "overtime_minutes": 627.8375221900412,
+                "staff_idle_rate": 0.5460545914724174,
+                "resource_imbalance": 0.6129089166866395,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.006298598333135309,
+                        "utilization": 0.43906484495602005,
+                        "busy_minutes": 18967.601302100065,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24232.398697899935,
+                        "overtime_minutes": 24.32906464181525,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.2724551631429468,
+                        "utilization": 0.7715602895495741,
+                        "busy_minutes": 22220.936339027736,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6579.063660972264,
+                        "overtime_minutes": 498.65549721720913,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.15865137286293468,
+                        "busy_minutes": 4569.159538452519,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24230.84046154748,
+                        "overtime_minutes": 104.85296033101685,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2277,
+                "patients_completed": 2268,
+                "patients_unfinished": 9,
+                "patients_no_show": 123,
+                "average_wait_minutes": 0.7792712837845442,
+                "average_time_in_clinic": 21.180804149922547,
+                "unfinished_patient_rate": 0.003952569169960474,
+                "overtime_minutes": 646.2115781012183,
+                "staff_idle_rate": 0.5396899032854885,
+                "resource_imbalance": 0.640112997053311,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.005947610183503644,
+                        "utilization": 0.43879317738875484,
+                        "busy_minutes": 18955.86526319421,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 24244.13473680579,
+                        "overtime_minutes": 29.907374669273622,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.554969589862542,
+                        "utilization": 0.7965042847354843,
+                        "busy_minutes": 22939.32340038195,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 5860.676599618051,
+                        "overtime_minutes": 505.0891493353526,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.1563912876821733,
+                        "busy_minutes": 4504.069085246591,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24295.930914753408,
+                        "overtime_minutes": 111.21505409659204,
+                        "max_queue": 0
+                    }
+                }
+            },
+            {
+                "patients_booked": 2400,
+                "patients_arrived": 2291,
+                "patients_completed": 2284,
+                "patients_unfinished": 7,
+                "patients_no_show": 109,
+                "average_wait_minutes": 0.7556497509145415,
+                "average_time_in_clinic": 21.204484881337766,
+                "unfinished_patient_rate": 0.0030554343081623746,
+                "overtime_minutes": 743.1188914374645,
+                "staff_idle_rate": 0.5355385424264001,
+                "resource_imbalance": 0.6298005612652477,
+                "stations": {
+                    "nurse": {
+                        "average_wait_minutes": 0.007782672535729733,
+                        "utilization": 0.44897031251700475,
+                        "busy_minutes": 19395.517500734604,
+                        "capacity_minutes": 43200.0,
+                        "idle_minutes": 23804.482499265396,
+                        "overtime_minutes": 21.3986725423523,
+                        "max_queue": 0
+                    },
+                    "doctor": {
+                        "average_wait_minutes": 1.5142409485133828,
+                        "utilization": 0.7909800969986702,
+                        "busy_minutes": 22780.226793561702,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 6019.773206438298,
+                        "overtime_minutes": 549.9026970804719,
+                        "max_queue": 0
+                    },
+                    "lab": {
+                        "average_wait_minutes": 0.0,
+                        "utilization": 0.16117953573342245,
+                        "busy_minutes": 4641.970629122567,
+                        "capacity_minutes": 28800.0,
+                        "idle_minutes": 24158.029370877433,
+                        "overtime_minutes": 171.81752181464032,
+                        "max_queue": 0
+                    }
+                }
+            }
+        ]
+    }
+}

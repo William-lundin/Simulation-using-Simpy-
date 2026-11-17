@@ -1,0 +1,56 @@
+{
+    "clinic": {
+        "name": "ClinicFlow",
+        "opening_hour": 8,
+        "closing_hour": 16
+    },
+
+    "stations": {
+        "nurse": {
+            "staff": 3,
+            "rooms": 3,
+            "service_time_mean": 12,
+            "service_time_std": 3
+        },
+
+        "doctor": {
+            "staff": 4,
+            "rooms": 2,
+            "service_time_mean": 20,
+            "service_time_std": 5
+        },
+
+        "lab": {
+            "staff": 2,
+            "rooms": 2,
+            "service_time_mean": 10,
+            "service_time_std": 2
+        }
+    },
+
+    "patient_types": {
+        "nurse_only": {
+            "route": ["nurse"]
+        },
+
+        "doctor_only": {
+            "route": ["doctor"]
+        },
+
+        "nurse_doctor": {
+            "route": ["nurse", "doctor"]
+        },
+
+        "nurse_lab": {
+            "route": ["nurse", "lab"]
+        }
+    },
+
+    "simulation": {
+        "days": 30,
+        "replications": 30,
+        "random_seed": 42,
+        "arrival_deviation_std": 3,
+        "no_show_probability": 0.05
+    }
+}

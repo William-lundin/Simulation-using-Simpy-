@@ -1,0 +1,23 @@
+{
+    "booking_rules": {
+        "nurse_only": {
+            "interval_minutes": 20,
+            "first_offset_minutes": 0
+        },
+
+        "doctor_only": {
+            "interval_minutes": 20,
+            "first_offset_minutes": 5
+        },
+
+        "nurse_doctor": {
+            "interval_minutes": 30,
+            "first_offset_minutes": 10
+        },
+
+        "nurse_lab": {
+            "interval_minutes": 30,
+            "first_offset_minutes": 15
+        }
+    }
+}

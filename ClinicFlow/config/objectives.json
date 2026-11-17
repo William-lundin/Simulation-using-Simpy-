@@ -1,0 +1,27 @@
+{
+    "weights": {
+        "waiting_time": 0.40,
+        "unfinished_patients": 0.25,
+        "overtime": 0.15,
+        "staff_idle_time": 0.10,
+        "resource_imbalance": 0.10
+    },
+
+    "targets": {
+        "waiting_time_minutes": 30,
+        "unfinished_patient_rate": 0.02,
+        "overtime_minutes": 30,
+        "staff_idle_rate": 0.30,
+        "utilization_difference": 0.20
+    },
+
+    "constraints": {
+        "maximum_unfinished_patient_rate": 0.05,
+        "maximum_overtime_minutes": 60
+    },
+
+    "search": {
+        "interval_multipliers": [0.8, 0.9, 1.1, 1.2],
+        "offset_shifts": [-10, 10]
+    }
+}
